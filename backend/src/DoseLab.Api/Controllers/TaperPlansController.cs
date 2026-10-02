@@ -7,26 +7,19 @@ namespace DoseLab.Api.Controllers;
 
 [ApiController]
 [Route("api/taper-plans")]
-public sealed class TaperPlansController : ControllerBase
+public sealed class TaperPlansController(TaperPlanService service) : ControllerBase
 {
-    private readonly TaperPlanService _service;
-
-    public TaperPlansController(TaperPlanService service)
-    {
-        _service = service;
-    }
-
     [HttpGet]
     public ActionResult<IReadOnlyList<TaperPlanResponse>> List()
     {
-        var plans = _service.List().Select(TaperPlanResponse.From).ToList();
+        var plans = service.List().Select(TaperPlanResponse.From).ToList();
         return Ok(plans);
     }
 
     [HttpGet("{id:guid}")]
     public ActionResult<TaperPlanResponse> Get(Guid id)
     {
-        var plan = _service.Find(id);
+        var plan = service.Find(id);
         if (plan is null)
             return NotFound(new ErrorResponse("Taper plan not found."));
 
@@ -38,7 +31,7 @@ public sealed class TaperPlansController : ControllerBase
     {
         try
         {
-            var schedule = _service.Preview(request.MedicationCode, request.StartingDailyDoseMg, request.WeekCount);
+            var schedule = service.Preview(request.MedicationCode, request.StartingDailyDoseMg, request.WeekCount);
             return Ok(ScheduleResponse.From(schedule));
         }
         catch (TaperValidationException exception)
@@ -53,7 +46,7 @@ public sealed class TaperPlansController : ControllerBase
     {
         try
         {
-            var plan = _service.Create(
+            var plan = service.Create(
                 request.PatientName,
                 request.MedicationCode,
                 request.StartingDailyDoseMg,

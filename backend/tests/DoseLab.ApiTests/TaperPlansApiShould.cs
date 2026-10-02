@@ -4,20 +4,13 @@ using Xunit;
 
 namespace DoseLab.ApiTests;
 
-public class TaperPlansApiShould : IClassFixture<WebApplicationFactory<Program>>
+public class TaperPlansApiShould(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
 {
-    private readonly HttpClient _client;
-
-    public TaperPlansApiShould(WebApplicationFactory<Program> factory)
-    {
-        _client = factory.CreateClient();
-    }
+    private readonly HttpClient _client = factory.CreateClient();
 
     [Fact]
     public async Task ReturnTheSeededTaperPlans()
     {
-        // setup
-
         // execute
 
         var response = await _client.GetAsync("/api/taper-plans");

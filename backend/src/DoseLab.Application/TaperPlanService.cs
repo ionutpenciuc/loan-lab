@@ -1,27 +1,16 @@
 namespace DoseLab.Application;
 
-public sealed class TaperPlanService
+public sealed class TaperPlanService(ITaperPlanRepository repository, IMedicationCatalog catalog, TimeProvider clock)
 {
     public const decimal MinimumStartingDoseMg = 1m;
     public const int MaximumWeekCount = 52;
 
-    private readonly ITaperPlanRepository _repository;
-    private readonly IMedicationCatalog _catalog;
-    private readonly TimeProvider _clock;
-
-    public TaperPlanService(ITaperPlanRepository repository, IMedicationCatalog catalog, TimeProvider clock)
-    {
-        _repository = repository;
-        _catalog = catalog;
-        _clock = clock;
-    }
-
-    public IReadOnlyList<Medication> Medications() => _catalog.List();
+    public IReadOnlyList<Medication> Medications() => catalog.List();
 
     public IReadOnlyList<TaperPlanSummary> List()
     {
-        var plans = _repository.List();
-        var names = _catalog.List().ToDictionary(medication => medication.Code, medication => medication.Name);
+        var plans = repository.List();
+        var names = catalog.List().ToDictionary(medication => medication.Code, medication => medication.Name);
 
         return plans
             .Select(plan => new TaperPlanSummary(plan, names.GetValueOrDefault(plan.MedicationCode, plan.MedicationCode)))
@@ -30,11 +19,11 @@ public sealed class TaperPlanService
 
     public TaperPlanSummary? Find(Guid id)
     {
-        var plan = _repository.List().FirstOrDefault(candidate => candidate.Id == id);
+        var plan = repository.List().FirstOrDefault(candidate => candidate.Id == id);
         if (plan is null)
             return null;
 
-        var medication = _catalog.Find(plan.MedicationCode);
+        var medication = catalog.Find(plan.MedicationCode);
         return new TaperPlanSummary(plan, medication?.Name ?? plan.MedicationCode);
     }
 
@@ -54,19 +43,19 @@ public sealed class TaperPlanService
 
         var medication = ValidateDose(medicationCode, startingDailyDoseMg, weekCount);
 
-        var plan = _repository.Add(new NewTaperPlan(
+        var plan = repository.Add(new NewTaperPlan(
             name,
             medication.Code,
             startingDailyDoseMg,
             weekCount,
-            DateOnly.FromDateTime(_clock.GetUtcNow().UtcDateTime)));
+            DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime)));
 
         return new TaperPlanSummary(plan, medication.Name);
     }
 
     private Medication ValidateDose(string? medicationCode, decimal startingDailyDoseMg, int weekCount)
     {
-        var medication = _catalog.Find(medicationCode ?? "")
+        var medication = catalog.Find(medicationCode ?? "")
             ?? throw new TaperValidationException("Unknown medication.");
 
         if (startingDailyDoseMg < MinimumStartingDoseMg)

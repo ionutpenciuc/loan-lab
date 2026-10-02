@@ -1,8 +1,3 @@
 namespace DoseLab.Application;
 
-public sealed class TaperValidationException : Exception
-{
-    public TaperValidationException(string message) : base(message)
-    {
-    }
-}
+public sealed class TaperValidationException(string message) : Exception(message);
