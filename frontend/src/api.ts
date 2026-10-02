@@ -1,22 +1,28 @@
-import type { CreateLoanInput, LoanAccount, LoanSchedule, ScheduleInput } from './types'
+import type { CreateTaperPlanInput, Medication, ScheduleInput, TaperPlan, TaperSchedule } from './types'
 
 const apiBase = import.meta.env.VITE_API_BASE ?? 'http://localhost:5080'
+const apiKey = import.meta.env.VITE_API_KEY ?? 'lab-dev-key'
 
-export function listLoanAccounts(): Promise<LoanAccount[]> {
-  return request<LoanAccount[]>('/api/loan-accounts')
+export function listMedications(): Promise<Medication[]> {
+  return request<Medication[]>('/api/medications')
 }
 
-export function previewSchedule(input: ScheduleInput): Promise<LoanSchedule> {
-  return request<LoanSchedule>('/api/loan-accounts/preview', {
+export function listTaperPlans(): Promise<TaperPlan[]> {
+  return request<TaperPlan[]>('/api/taper-plans')
+}
+
+export function previewSchedule(input: ScheduleInput): Promise<TaperSchedule> {
+  return request<TaperSchedule>('/api/taper-plans/preview', {
     method: 'POST',
     body: JSON.stringify(input),
   })
 }
 
-export function createLoanAccount(input: CreateLoanInput): Promise<LoanAccount> {
-  return request<LoanAccount>('/api/loan-accounts', {
+export function createTaperPlan(input: CreateTaperPlanInput): Promise<TaperPlan> {
+  return request<TaperPlan>('/api/taper-plans', {
     method: 'POST',
     body: JSON.stringify(input),
+    headers: { 'X-Api-Key': apiKey },
   })
 }
 

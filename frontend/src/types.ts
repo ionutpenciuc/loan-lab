@@ -1,33 +1,38 @@
-export interface LoanAccount {
+export interface Medication {
+  code: string
+  name: string
+  maxDailyDoseMg: number
+}
+
+export interface TaperPlan {
   id: string
-  customerName: string
-  amount: number
-  annualInterestRate: number
-  installmentCount: number
+  referenceNumber: string
+  patientName: string
+  medicationCode: string
+  medicationName: string
+  startingDailyDoseMg: number
+  weekCount: number
   createdOn: string
 }
 
-export interface ScheduleLine {
-  number: number
-  principal: number
-  interest: number
-  installment: number
-  remainingBalance: number
+export interface ScheduleWeek {
+  week: number
+  dailyDoseMg: number
+  weeklyTotalMg: number
+  cumulativeTotalMg: number
 }
 
-export interface LoanSchedule {
-  lines: ScheduleLine[]
-  totalPrincipal: number
-  totalInterest: number
-  totalInstallment: number
+export interface TaperSchedule {
+  weeks: ScheduleWeek[]
+  totalMg: number
 }
 
 export interface ScheduleInput {
-  amount: number
-  annualInterestRate: number
-  installmentCount: number
+  medicationCode: string
+  startingDailyDoseMg: number
+  weekCount: number
 }
 
-export interface CreateLoanInput extends ScheduleInput {
-  customerName: string
+export interface CreateTaperPlanInput extends ScheduleInput {
+  patientName: string
 }

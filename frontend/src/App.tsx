@@ -1,53 +1,57 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { createLoanAccount, listLoanAccounts, previewSchedule } from './api'
-import type { LoanAccount, LoanSchedule } from './types'
+import { createTaperPlan, listMedications, listTaperPlans, previewSchedule } from './api'
+import type { Medication, ScheduleInput, TaperPlan, TaperSchedule } from './types'
 
 export default function App() {
-  const [accounts, setAccounts] = useState<LoanAccount[]>([])
+  const [plans, setPlans] = useState<TaperPlan[]>([])
+  const [medications, setMedications] = useState<Medication[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [formOpen, setFormOpen] = useState(false)
-  const [customerName, setCustomerName] = useState('')
-  const [amount, setAmount] = useState('')
-  const [annualInterestRate, setAnnualInterestRate] = useState('')
-  const [installmentCount, setInstallmentCount] = useState('')
-  const [schedule, setSchedule] = useState<LoanSchedule | null>(null)
+  const [patientName, setPatientName] = useState('')
+  const [medicationCode, setMedicationCode] = useState('')
+  const [startingDose, setStartingDose] = useState('')
+  const [weekCount, setWeekCount] = useState('')
+  const [schedule, setSchedule] = useState<TaperSchedule | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
-    void loadAccounts()
+    void loadPlans()
+    listMedications()
+      .then(setMedications)
+      .catch(() => setMedications([]))
   }, [])
 
-  async function loadAccounts() {
+  async function loadPlans() {
     setLoading(true)
     setLoadError(null)
     try {
-      setAccounts(await listLoanAccounts())
+      setPlans(await listTaperPlans())
     } catch {
-      setLoadError('Could not load loan accounts. Start the API at http://localhost:5080.')
+      setLoadError('Could not load taper plans. Start the API at http://localhost:5080.')
     } finally {
       setLoading(false)
     }
   }
 
-  function readScheduleInput():
-    | { amount: number; annualInterestRate: number; installmentCount: number }
-    | string {
-    if (!/^\d+$/.test(installmentCount.trim())) {
-      return 'Number of installments must be a whole number from 1 to 360.'
+  function readScheduleInput(): ScheduleInput | string {
+    if (medicationCode === '') {
+      return 'Select a medication.'
+    }
+    if (!/^\d+$/.test(weekCount.trim())) {
+      return 'Number of weeks must be a whole number from 1 to 52.'
     }
 
-    const parsedAmount = Number(amount)
-    const parsedRate = Number(annualInterestRate)
-    if (!Number.isFinite(parsedAmount) || !Number.isFinite(parsedRate)) {
-      return 'Enter a loan amount and an annual interest rate.'
+    const dose = Number(startingDose)
+    if (startingDose.trim() === '' || !Number.isFinite(dose)) {
+      return 'Enter a starting daily dose in mg.'
     }
 
     return {
-      amount: parsedAmount,
-      annualInterestRate: parsedRate,
-      installmentCount: Number(installmentCount),
+      medicationCode,
+      startingDailyDoseMg: dose,
+      weekCount: Number(weekCount),
     }
   }
 
@@ -82,16 +86,16 @@ export default function App() {
     setBusy(true)
     setFormError(null)
     try {
-      await createLoanAccount({ ...input, customerName })
-      setCustomerName('')
-      setAmount('')
-      setAnnualInterestRate('')
-      setInstallmentCount('')
+      await createTaperPlan({ ...input, patientName })
+      setPatientName('')
+      setMedicationCode('')
+      setStartingDose('')
+      setWeekCount('')
       setSchedule(null)
       setFormOpen(false)
-      await loadAccounts()
+      await loadPlans()
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : 'Could not save the loan account.')
+      setFormError(error instanceof Error ? error.message : 'Could not save the taper plan.')
     } finally {
       setBusy(false)
     }
@@ -101,36 +105,41 @@ export default function App() {
     <main>
       <header className="page-header">
         <div>
-          <h1>Loan accounts</h1>
-          <p>DBE schedule: equal principal each month. Interest is charged on the remaining balance.</p>
+          <h1>Taper plans</h1>
+          <p>
+            The daily dose drops by the same step every week. Medications and limits are fictional, for practice
+            only.
+          </p>
         </div>
         <button type="button" onClick={() => setFormOpen((open) => !open)} aria-expanded={formOpen}>
-          Add loan account
+          Add taper plan
         </button>
       </header>
 
-      {loading && <p>Loading loan accounts…</p>}
+      {loading && <p>Loading taper plans…</p>}
       {loadError && <p role="alert">{loadError}</p>}
 
       {!loading && !loadError && (
-        <table aria-label="Loan accounts">
+        <table aria-label="Taper plans">
           <thead>
             <tr>
-              <th scope="col">Customer</th>
-              <th scope="col">Amount</th>
-              <th scope="col">Interest rate</th>
-              <th scope="col">Installments</th>
+              <th scope="col">Reference</th>
+              <th scope="col">Patient</th>
+              <th scope="col">Medication</th>
+              <th scope="col">Starting dose (mg/day)</th>
+              <th scope="col">Weeks</th>
               <th scope="col">Created</th>
             </tr>
           </thead>
           <tbody>
-            {accounts.map((account) => (
-              <tr key={account.id}>
-                <td>{account.customerName}</td>
-                <td className="num">{formatMoney(account.amount)}</td>
-                <td className="num">{account.annualInterestRate}%</td>
-                <td className="num">{account.installmentCount}</td>
-                <td>{account.createdOn}</td>
+            {plans.map((plan) => (
+              <tr key={plan.id}>
+                <td>{plan.referenceNumber}</td>
+                <td>{plan.patientName}</td>
+                <td>{plan.medicationName}</td>
+                <td className="num">{formatDose(plan.startingDailyDoseMg)}</td>
+                <td className="num">{plan.weekCount}</td>
+                <td>{plan.createdOn}</td>
               </tr>
             ))}
           </tbody>
@@ -139,45 +148,42 @@ export default function App() {
 
       {formOpen && (
         <section className="panel">
-          <h2>New loan account</h2>
+          <h2>New taper plan</h2>
           <form onSubmit={onSave}>
-            <label htmlFor="customer-name">Customer name</label>
+            <label htmlFor="patient-name">Patient name</label>
             <input
-              id="customer-name"
-              value={customerName}
-              onChange={(event) => setCustomerName(event.target.value)}
+              id="patient-name"
+              value={patientName}
+              onChange={(event) => setPatientName(event.target.value)}
               autoFocus
-              required
             />
 
-            <label htmlFor="loan-amount">Loan amount</label>
+            <label htmlFor="medication">Medication</label>
+            <select id="medication" value={medicationCode} onChange={(event) => setMedicationCode(event.target.value)}>
+              <option value="">Select…</option>
+              {medications.map((medication) => (
+                <option key={medication.code} value={medication.code}>
+                  {medication.name} (max {formatDose(medication.maxDailyDoseMg)} mg/day)
+                </option>
+              ))}
+            </select>
+
+            <label htmlFor="starting-dose">Starting daily dose (mg)</label>
             <input
-              id="loan-amount"
-              value={amount}
-              onChange={(event) => setAmount(event.target.value)}
+              id="starting-dose"
+              value={startingDose}
+              onChange={(event) => setStartingDose(event.target.value)}
               inputMode="decimal"
-              required
             />
 
-            <label htmlFor="interest-rate">Annual interest rate</label>
+            <label htmlFor="week-count">Number of weeks</label>
             <input
-              id="interest-rate"
-              value={annualInterestRate}
-              onChange={(event) => setAnnualInterestRate(event.target.value)}
-              inputMode="decimal"
-              required
-            />
-            <p className="hint">Percent per year. Example: 12</p>
-
-            <label htmlFor="installment-count">Number of installments</label>
-            <input
-              id="installment-count"
-              value={installmentCount}
-              onChange={(event) => setInstallmentCount(event.target.value)}
+              id="week-count"
+              value={weekCount}
+              onChange={(event) => setWeekCount(event.target.value)}
               inputMode="numeric"
-              required
             />
-            <p className="hint">Whole number of months, from 1 to 360.</p>
+            <p className="hint">Whole number, from 1 to 52.</p>
 
             {formError && <p role="alert">{formError}</p>}
 
@@ -193,35 +199,32 @@ export default function App() {
 
           {schedule && (
             <>
-              <h2>Repayment schedule</h2>
-              <table aria-label="Repayment schedule">
+              <h2>Taper schedule</h2>
+              <table aria-label="Taper schedule">
                 <thead>
                   <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Principal</th>
-                    <th scope="col">Interest</th>
-                    <th scope="col">Installment</th>
-                    <th scope="col">Remaining balance</th>
+                    <th scope="col">Week</th>
+                    <th scope="col">Daily dose (mg)</th>
+                    <th scope="col">Weekly total (mg)</th>
+                    <th scope="col">Cumulative (mg)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {schedule.lines.map((line) => (
-                    <tr key={line.number}>
-                      <td className="num">{line.number}</td>
-                      <td className="num">{formatMoney(line.principal)}</td>
-                      <td className="num">{formatMoney(line.interest)}</td>
-                      <td className="num">{formatMoney(line.installment)}</td>
-                      <td className="num">{formatMoney(line.remainingBalance)}</td>
+                  {schedule.weeks.map((week) => (
+                    <tr key={week.week}>
+                      <td className="num">{week.week}</td>
+                      <td className="num">{formatDose(week.dailyDoseMg)}</td>
+                      <td className="num">{formatDose(week.weeklyTotalMg)}</td>
+                      <td className="num">{formatDose(week.cumulativeTotalMg)}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr>
                     <th scope="row">Total</th>
-                    <td className="num">{formatMoney(schedule.totalPrincipal)}</td>
-                    <td className="num">{formatMoney(schedule.totalInterest)}</td>
-                    <td className="num">{formatMoney(schedule.totalInstallment)}</td>
                     <td></td>
+                    <td></td>
+                    <td className="num">{formatDose(schedule.totalMg)}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -233,7 +236,7 @@ export default function App() {
   )
 }
 
-function formatMoney(value: number): string {
+function formatDose(value: number): string {
   return value.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
