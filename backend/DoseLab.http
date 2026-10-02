@@ -1,0 +1,35 @@
+### Rider / Visual Studio / VS Code REST Client: click the run arrow next to a request.
+@api = http://localhost:5080
+@key = lab-dev-key
+
+### Medications
+GET {{api}}/api/medications
+
+### All taper plans
+GET {{api}}/api/taper-plans
+
+### Preview a schedule (nothing is saved)
+POST {{api}}/api/taper-plans/preview
+Content-Type: application/json
+
+{ "medicationCode": "CLM", "startingDailyDoseMg": 10, "weekCount": 3 }
+
+### Save a plan (needs the API key)
+POST {{api}}/api/taper-plans
+Content-Type: application/json
+X-Api-Key: {{key}}
+
+{ "patientName": "Ana Pop", "medicationCode": "STR", "startingDailyDoseMg": 40, "weekCount": 4 }
+
+### Save without the key: expect 401
+POST {{api}}/api/taper-plans
+Content-Type: application/json
+
+{ "patientName": "No Key", "medicationCode": "STR", "startingDailyDoseMg": 40, "weekCount": 4 }
+
+### Dose above the maximum: expect 400
+POST {{api}}/api/taper-plans
+Content-Type: application/json
+X-Api-Key: {{key}}
+
+{ "patientName": "Too High", "medicationCode": "NRV", "startingDailyDoseMg": 25, "weekCount": 4 }

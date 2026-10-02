@@ -1,0 +1,14 @@
+diff --git a/frontend/src/App.tsx b/frontend/src/App.tsx
+index f6694a3..8c1af38 100644
+--- a/frontend/src/App.tsx
++++ b/frontend/src/App.tsx
+@@ -238,7 +238,7 @@ export default function App() {
+ 
+ function formatDose(value: number): string {
+   return value.toLocaleString('en-US', {
+-    minimumFractionDigits: 2,
+-    maximumFractionDigits: 2,
++    minimumFractionDigits: 1,
++    maximumFractionDigits: 1,
+   })
+ }

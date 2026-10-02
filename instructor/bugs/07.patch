@@ -1,0 +1,16 @@
+diff --git a/backend/src/DoseLab.Application/TaperPlanService.cs b/backend/src/DoseLab.Application/TaperPlanService.cs
+index 3c7823e..e1dfe40 100644
+--- a/backend/src/DoseLab.Application/TaperPlanService.cs
++++ b/backend/src/DoseLab.Application/TaperPlanService.cs
+@@ -21,10 +21,9 @@ public sealed class TaperPlanService
+     public IReadOnlyList<TaperPlanSummary> List()
+     {
+         var plans = _repository.List();
+-        var names = _catalog.List().ToDictionary(medication => medication.Code, medication => medication.Name);
+ 
+         return plans
+-            .Select(plan => new TaperPlanSummary(plan, names.GetValueOrDefault(plan.MedicationCode, plan.MedicationCode)))
++            .Select(plan => new TaperPlanSummary(plan, _catalog.Find(plan.MedicationCode)?.Name ?? plan.MedicationCode))
+             .ToList();
+     }
+ 

@@ -1,0 +1,75 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    name: Unit and API tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Run tests
+        run: dotnet test backend/DoseLab.slnx --logger trx --results-directory TestResults
+      - name: Keep test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: TestResults
+
+  e2e:
+    name: Playwright UI tests
+    needs: backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run Playwright
+        run: npm run test:e2e
+      - name: Keep Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+
+  perf-smoke:
+    name: k6 performance smoke
+    needs: backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Start the API
+        run: |
+          dotnet run --project backend/src/DoseLab.Api --no-launch-profile --urls http://localhost:5080 > api.log 2>&1 &
+          for i in $(seq 1 90); do
+            curl -fs http://localhost:5080/api/medications > /dev/null && exit 0
+            sleep 1
+          done
+          cat api.log
+          exit 1
+      - uses: grafana/setup-k6-action@v1
+      - name: Run k6 smoke
+        run: k6 run perf/smoke.js

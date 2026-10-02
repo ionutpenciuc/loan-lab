@@ -1,0 +1,13 @@
+diff --git a/backend/src/DoseLab.Api/Controllers/TaperPlansController.cs b/backend/src/DoseLab.Api/Controllers/TaperPlansController.cs
+index f80817c..49e67ed 100644
+--- a/backend/src/DoseLab.Api/Controllers/TaperPlansController.cs
++++ b/backend/src/DoseLab.Api/Controllers/TaperPlansController.cs
+@@ -59,7 +59,7 @@ public sealed class TaperPlansController : ControllerBase
+                 request.StartingDailyDoseMg,
+                 request.WeekCount);
+             var body = TaperPlanResponse.From(plan);
+-            return CreatedAtAction(nameof(Get), new { id = body.Id }, body);
++            return Ok(body);
+         }
+         catch (TaperValidationException exception)
+         {

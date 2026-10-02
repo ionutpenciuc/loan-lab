@@ -1,0 +1,64 @@
+# GitLab CI version of .github/workflows/ci.yml, for study.
+# GitHub does not run this file. To use it on GitLab, copy it to .gitlab-ci.yml at the repo root.
+
+stages:
+  - test
+  - e2e
+  - performance
+
+variables:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+
+backend-tests:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:10.0
+  script:
+    - dotnet test backend/DoseLab.slnx --logger trx --results-directory TestResults
+  artifacts:
+    when: always
+    paths:
+      - TestResults/
+    expire_in: 1 week
+
+e2e-tests:
+  stage: e2e
+  needs: [backend-tests]
+  image: mcr.microsoft.com/playwright:v1.63.0-noble
+  before_script:
+    - curl -fsSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
+    - bash dotnet-install.sh --channel 10.0 --install-dir "$HOME/.dotnet"
+    - export PATH="$HOME/.dotnet:$PATH"
+  script:
+    - cd frontend
+    - npm ci
+    - npm run test:e2e
+  artifacts:
+    when: always
+    paths:
+      - frontend/playwright-report/
+      - frontend/test-results/
+    expire_in: 1 week
+
+.api-running: &api-running
+  image: mcr.microsoft.com/dotnet/sdk:10.0
+  before_script:
+    - curl -fsSL https://github.com/grafana/k6/releases/download/v2.3.0/k6-v2.3.0-linux-amd64.tar.gz | tar -xz --strip-components=1 -C /usr/local/bin
+    - dotnet run --project backend/src/DoseLab.Api --no-launch-profile --urls http://localhost:5080 > api.log 2>&1 &
+    - for i in $(seq 1 90); do curl -fs http://localhost:5080/api/medications > /dev/null && break; sleep 1; done
+
+perf-smoke:
+  <<: *api-running
+  stage: performance
+  needs: [backend-tests]
+  script:
+    - k6 run perf/smoke.js
+
+# Long tests run only on a schedule (CI/CD → Schedules in GitLab), never on every push.
+# perf/stress-create.js is the stress test you write in lesson 05.
+perf-stress-nightly:
+  <<: *api-running
+  stage: performance
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  script:
+    - k6 run perf/stress-create.js

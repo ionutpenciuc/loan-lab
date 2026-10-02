@@ -1,0 +1,13 @@
+diff --git a/backend/src/DoseLab.Api/Security/RequireApiKeyAttribute.cs b/backend/src/DoseLab.Api/Security/RequireApiKeyAttribute.cs
+index 5e00978..a2fb31c 100644
+--- a/backend/src/DoseLab.Api/Security/RequireApiKeyAttribute.cs
++++ b/backend/src/DoseLab.Api/Security/RequireApiKeyAttribute.cs
+@@ -14,7 +14,7 @@ public sealed class RequireApiKeyAttribute : Attribute, IAuthorizationFilter
+         var expected = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>()["Lab:ApiKey"];
+         var provided = context.HttpContext.Request.Headers[HeaderName].ToString();
+ 
+-        if (string.IsNullOrEmpty(expected) || provided != expected)
++        if (!string.IsNullOrEmpty(provided) && provided != expected)
+         {
+             context.Result = new UnauthorizedObjectResult(
+                 new ErrorResponse($"A valid {HeaderName} header is required."));

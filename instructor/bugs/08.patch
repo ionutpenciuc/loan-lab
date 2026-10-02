@@ -1,0 +1,24 @@
+diff --git a/backend/src/DoseLab.Application/InMemoryTaperPlanRepository.cs b/backend/src/DoseLab.Application/InMemoryTaperPlanRepository.cs
+index 0fd92b8..1c47492 100644
+--- a/backend/src/DoseLab.Application/InMemoryTaperPlanRepository.cs
++++ b/backend/src/DoseLab.Application/InMemoryTaperPlanRepository.cs
+@@ -22,12 +22,18 @@ public sealed class InMemoryTaperPlanRepository : ITaperPlanRepository
+ 
+     public TaperPlan Add(NewTaperPlan draft)
+     {
++        int number;
++        lock (_gate)
++        {
++            number = _plans.Count + 1;
++        }
++
+         _latency.Wait();
+         lock (_gate)
+         {
+             var plan = new TaperPlan(
+                 Guid.NewGuid(),
+-                $"TP-{_plans.Count + 1:0000}",
++                $"TP-{number:0000}",
+                 draft.PatientName,
+                 draft.MedicationCode,
+                 draft.StartingDailyDoseMg,

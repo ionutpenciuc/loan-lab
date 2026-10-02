@@ -1,67 +1,55 @@
-# Loan lab
+# Dose lab
 
-A small loan-account app for QA automation practice.
+A small medical-style app for learning test automation: unit, API, UI (Playwright), performance and stress (k6), CI, security, and AI-assisted testing.
 
-The backend is .NET. The UI is React. Data is stored in memory. Restart the API and the saved loans are gone. Two sample loans are loaded again.
+Nurses create **taper plans**: a patient's daily dose of a medication goes down by the same step every week. The app shows the plans, previews the week-by-week schedule, and saves new plans.
 
-You can:
+The medications and their limits are **fictional**. This is not medical guidance.
 
-- View the loan list
-- Add a loan account
-- Preview a DBE repayment schedule
-- Save the loan and see it in the list
+- Backend: .NET 10 Web API, in `backend/`. Data is kept in memory. Restart the API and saved plans are gone. Two sample plans come back.
+- Frontend: React + TypeScript (Vite), in `frontend/`.
 
-DBE means equal principal each month. Interest is charged on the remaining balance. The installment gets smaller each month.
+**Start here after setup: [lessons/README.md](lessons/README.md)**, the 3-day study plan.
 
 ## Install the tools
 
-You need Git, the .NET 10 SDK, and Node.js 20 or newer.
+| Tool | Check | Download |
+| --- | --- | --- |
+| Git | `git --version` | https://git-scm.com |
+| .NET 10 SDK | `dotnet --version` (must start with `10.`) | https://dotnet.microsoft.com/download/dotnet/10.0 |
+| Node.js 20 or newer | `node --version` | https://nodejs.org |
+| k6 (for lesson 05) | `k6 version` | https://grafana.com/docs/k6/latest/set-up/install-k6/ |
 
-Check:
-
-```bash
-git --version
-dotnet --version
-node --version
-```
-
-`dotnet --version` must start with `10.`.
-
-Download .NET 10: https://dotnet.microsoft.com/download/dotnet/10.0
-
-Download Node.js: https://nodejs.org
+On Windows, use Git Bash for the `instructor/bug.sh` script. All other commands work in PowerShell too.
 
 ## Start the app
 
-Use two terminals. Leave both open.
-
 ### 1. Clone
+
+Clone your own fork (see lessons/README.md), or this repo:
 
 ```bash
 git clone https://github.com/ionutpenciuc/loan-lab.git
 cd loan-lab
 ```
 
-### 2. Start the API
+### 2. Start the API (terminal 1)
 
 ```bash
 cd backend
-dotnet run --project src/LoanLab.Api
+dotnet run --project src/DoseLab.Api
 ```
 
-Wait until the terminal says:
+Wait for `Now listening on: http://localhost:5080`. The first run downloads packages and can take about a minute.
 
-```text
-Now listening on: http://localhost:5080
-```
+- API docs: http://localhost:5080/swagger
+- Ready-made requests for Rider or VS Code: `backend/DoseLab.http`
 
-The first run can take about a minute. It downloads packages.
+In Rider: open `backend/DoseLab.slnx`, choose the `DoseLab.Api: http` run configuration, and press Run.
 
-API docs: http://localhost:5080/swagger
+### 3. Start the UI (terminal 2)
 
-### 3. Start the UI
-
-Open a second terminal. Go to the same `loan-lab` folder (the folder that contains this README).
+From the repo folder:
 
 ```bash
 cd frontend
@@ -69,62 +57,51 @@ npm install
 npm run dev
 ```
 
-Wait until the terminal shows `http://localhost:5173`.
+Open http://localhost:5173. You should see two plans: Maria Ionescu and Andrei Stan.
 
-The first `npm install` can take about a minute.
+### 4. Try it once
 
-### 4. Open the app
+1. Click **Add taper plan**.
+2. Patient name: `Ana Pop`. Medication: **Calmafen**. Starting daily dose: `10`. Number of weeks: `3`.
+3. Click **Preview schedule**. Week 2 shows `6.67`. Week 3 shows `3.34`.
+4. Click **Save**. Ana Pop appears in the list with reference `TP-0003`.
 
-Open http://localhost:5173
+## Run the tests
 
-You should see two loans:
+| Level | Command | Folder | Sample tests |
+| --- | --- | --- | --- |
+| Unit + API | `dotnet test` | `backend` | 3 |
+| UI (Playwright) | `npx playwright install chromium` (once), then `npm run test:e2e` | `frontend` | 1 |
+| Performance smoke | `k6 run perf/smoke.js` (API must be running) | repo root | 1 |
 
-- Maria Ionescu
-- Andrei Stan
+Playwright starts the API and the UI itself, or reuses them if they already run. To use other ports: `LAB_API_PORT=5181 LAB_UI_PORT=5182 npm run test:e2e`.
 
-Try the screen once:
+GitHub Actions runs all three levels on every push: `.github/workflows/ci.yml`.
 
-1. Click **Add loan account**.
-2. Customer name: `Ana Pop`
-3. Loan amount: `1200`
-4. Annual interest rate: `12`
-5. Number of installments: `12`
-6. Click **Preview schedule**. Row 1 installment is `112.00`.
-7. Click **Save**. `Ana Pop` appears in the list.
+## Repo map
 
-## Run the sample tests
-
-Stop is not required. You can leave the app running.
-
-Backend tests, from the `backend` folder:
-
-```bash
-dotnet test
-```
-
-You should see 3 passed tests.
-
-Browser test, from the `frontend` folder:
-
-```bash
-npx playwright install chromium
-npm run test:e2e
-```
-
-Install Chromium once. Later, run only `npm run test:e2e`.
-
-The browser test starts the API and the UI when they are not already running.
-
-## Next
-
-Read [LEARNING.md](LEARNING.md). It is the 3-day study plan.
+| Path | What |
+| --- | --- |
+| `backend/src/DoseLab.Application/` | Rules: taper calculator, service, in-memory repository, medication catalog |
+| `backend/src/DoseLab.Api/` | Controllers, API key filter, contracts |
+| `backend/tests/` | Sample unit and API tests. Add yours here. |
+| `frontend/src/` | The React screen |
+| `frontend/e2e/` | Playwright tests. Add yours here. |
+| `perf/` | k6 scripts |
+| `lessons/` | 10 lessons and the study plan |
+| `exams/` | 3 exams |
+| `CLAUDE.md`, `.claude/` | Context, skills, and a reviewer agent for AI coding agents |
+| `ci/` | GitLab CI version of the pipeline, for study |
+| `instructor/` | For the mentor only: hidden bugs and answer keys. Do not open. |
 
 ## If something fails
 
 | What you see | What to do |
 | --- | --- |
 | `Now listening` never appears | Run `dotnet --version`. Install the .NET 10 SDK. |
-| UI says it could not load loan accounts | The API is not running, or it is not on port 5080. |
-| Port already in use | Close the old terminal that still runs the API or the UI. Start it again. |
-| `npm` is not found | Install Node.js 20 or newer. Open a new terminal. |
-| Playwright cannot find the browser | Run `npx playwright install chromium` again from `frontend`. |
+| UI says it could not load taper plans | The API is not running, or not on port 5080. |
+| UI shows old data or old screens | An old API or UI still runs. Stop it (Ctrl+C) and start again. |
+| Port already in use | Close the old terminal or Rider run that still uses the port. |
+| `npm` is not found | Install Node.js. Open a new terminal. |
+| Playwright cannot find the browser | Run `npx playwright install chromium` in `frontend`. |
+| k6 thresholds fail on a second run | Restart the API. Data from the last run is still in memory. |

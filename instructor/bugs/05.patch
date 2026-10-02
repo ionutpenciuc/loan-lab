@@ -1,0 +1,12 @@
+diff --git a/frontend/src/App.tsx b/frontend/src/App.tsx
+index f6694a3..9ef9528 100644
+--- a/frontend/src/App.tsx
++++ b/frontend/src/App.tsx
+@@ -93,7 +93,6 @@ export default function App() {
+       setWeekCount('')
+       setSchedule(null)
+       setFormOpen(false)
+-      await loadPlans()
+     } catch (error) {
+       setFormError(error instanceof Error ? error.message : 'Could not save the taper plan.')
+     } finally {

@@ -1,0 +1,13 @@
+diff --git a/backend/src/DoseLab.Application/TaperScheduleCalculator.cs b/backend/src/DoseLab.Application/TaperScheduleCalculator.cs
+index 0c965b4..0704edc 100644
+--- a/backend/src/DoseLab.Application/TaperScheduleCalculator.cs
++++ b/backend/src/DoseLab.Application/TaperScheduleCalculator.cs
+@@ -18,7 +18,7 @@ public static class TaperScheduleCalculator
+ 
+         for (var week = 1; week <= weekCount; week++)
+         {
+-            var dailyDose = startingDailyDoseMg - (week - 1) * step;
++            var dailyDose = Math.Floor(startingDailyDoseMg * (weekCount - week + 1) / weekCount * 100m) / 100m;
+             var weeklyTotal = dailyDose * 7;
+             cumulative += weeklyTotal;
+ 

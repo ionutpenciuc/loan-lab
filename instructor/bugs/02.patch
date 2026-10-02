@@ -1,0 +1,13 @@
+diff --git a/backend/src/DoseLab.Application/TaperPlanService.cs b/backend/src/DoseLab.Application/TaperPlanService.cs
+index 3c7823e..c3165b3 100644
+--- a/backend/src/DoseLab.Application/TaperPlanService.cs
++++ b/backend/src/DoseLab.Application/TaperPlanService.cs
+@@ -71,7 +71,7 @@ public sealed class TaperPlanService
+ 
+         if (startingDailyDoseMg < MinimumStartingDoseMg)
+             throw new TaperValidationException("Starting daily dose must be at least 1 mg.");
+-        if (startingDailyDoseMg > medication.MaxDailyDoseMg)
++        if (startingDailyDoseMg >= medication.MaxDailyDoseMg)
+             throw new TaperValidationException(
+                 $"Starting daily dose must not exceed {medication.MaxDailyDoseMg:0.##} mg for {medication.Name}.");
+         if (weekCount < 1 || weekCount > MaximumWeekCount)
