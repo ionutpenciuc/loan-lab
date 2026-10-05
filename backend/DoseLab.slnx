@@ -2,9 +2,11 @@
   <Folder Name="/src/">
     <Project Path="src/DoseLab.Api/DoseLab.Api.csproj" />
     <Project Path="src/DoseLab.Application/DoseLab.Application.csproj" />
+    <Project Path="src/DoseLab.Algorithms/DoseLab.Algorithms.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/DoseLab.ApiTests/DoseLab.ApiTests.csproj" />
     <Project Path="tests/DoseLab.UnitTests/DoseLab.UnitTests.csproj" />
+    <Project Path="tests/DoseLab.AlgorithmTests/DoseLab.AlgorithmTests.csproj" />
   </Folder>
 </Solution>

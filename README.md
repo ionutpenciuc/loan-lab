@@ -70,7 +70,7 @@ Open http://localhost:5173. You should see two plans: Maria Ionescu and Andrei S
 
 | Level | Command | Folder | Sample tests |
 | --- | --- | --- | --- |
-| Unit + API | `dotnet test` | `backend` | 3 |
+| Unit + API | `dotnet test` | `backend` | 3 taper samples, plus the algorithm tests |
 | UI (Playwright) | `npx playwright install chromium` (once), then `npm run test:e2e` | `frontend` | 1 |
 | Performance smoke | `k6 run perf/smoke.js` (API must be running) | repo root | 1 |
 
@@ -83,6 +83,7 @@ GitHub Actions runs all three levels on every push: `.github/workflows/ci.yml`.
 | Path | What |
 | --- | --- |
 | `backend/src/DoseLab.Application/` | Rules: taper calculator, service, in-memory repository, medication catalog |
+| `backend/src/DoseLab.Algorithms/` | Interview algorithms: search, sort, hash map, stack, graph, dynamic programming |
 | `backend/src/DoseLab.Api/` | Controllers, API key filter, contracts |
 | `backend/tests/` | Sample unit and API tests. Add yours here. |
 | `frontend/src/` | The React screen |
