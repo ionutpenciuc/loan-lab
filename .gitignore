@@ -6,3 +6,8 @@
 *.user
 TestResults/
 instructor/verify.log
+StrykerOutput/
+BenchmarkDotNet.Artifacts/
+coverage-report/
+*.nettrace
+zap-report*

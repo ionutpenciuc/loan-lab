@@ -15,6 +15,8 @@ Goal: test the real HTTP API in memory: status codes, headers, body, errors, and
 | System integration | Your app + another real system (database, payment service) |
 | Contract test | Check that the API shape is what the frontend expects. Tool: Pact |
 
+The "system integration" kind, with a real PostgreSQL in Docker, is [lesson 12](12-real-dependencies-docker-testcontainers.md). A custom test factory that swaps the clock and settings is in [lesson 11](11-test-harness-engineering.md).
+
 ### WebApplicationFactory
 
 `WebApplicationFactory<Program>` starts the real API **in memory**. You get an `HttpClient`. There is no browser and no network port. It is fast (milliseconds per request) and real: routing, the API key filter, validation, and JSON all run.

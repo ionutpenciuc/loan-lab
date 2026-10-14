@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\DoseLab.Application\DoseLab.Application.csproj" />
+    <ProjectReference Include="..\DoseLab.Postgres\DoseLab.Postgres.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />

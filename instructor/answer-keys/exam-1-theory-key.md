@@ -1,6 +1,6 @@
 # Exam 1 — Answer key
 
-Total 40. Pass 32.
+Parts A and B: 40, pass 32. Part C: 20, pass 14. Both must pass.
 
 ## Part A (1 point each)
 
@@ -57,3 +57,25 @@ Give 2 for a correct answer with the key point, 1 for partly right, 0 for wrong.
 - Changes to product code to make tests pass → rules in `CLAUDE.md`, review.
 - Patient data leaked into prompts → synthetic data only, follow policy.
 - Accountability in regulated work → a human reviews and owns each test, traceability kept.
+
+## Part C (2 points each)
+
+**31.** A `WebApplicationFactory<Program>` (or a subclass like `DoseLabApiFactory`) with `builder.UseSetting("Lab:ApiKey", ...)` in `ConfigureWebHost` / `WithWebHostBuilder` (1 point each: the class, the method). Environment variable `Lab__ApiKey` also accepted for 1 point.
+
+**32.** Stub returns fixed answers; mock also checks that calls happened (1 point). Bad idea when the call is not the requirement: it mirrors the implementation, breaks on refactors, finds no bugs (over-specification) (1 point).
+
+**33.** The code runs, but many results are not checked: weak or missing assertions (1 point). Look at survived mutants and write tests that kill them, starting with risky code (dose rules) (1 point).
+
+**34.** Shared state / order dependence: another test changes shared data (1 point). Reproduce alone vs together and read what the tests share (fixture, data, static state); quarantine it if it is in the blocking path (1 point).
+
+**35.** Real behavior (types, SQL, constraints) and isolation: fresh database per test, no leftover data, same in CI (1 point). Cost: needs Docker; seconds of start-up; more CI resources (1 point).
+
+**36.** Thread pool starvation from blocking calls (sync I/O, `Thread.Sleep`, `.Result`) (2 points; 1 if only "too many requests").
+
+**37.** The scanner's requests failed validation earlier (unknown medication, missing key), so they never reached the SQL; scanners need valid business input (1 point). Findings: SQL injection (A03) and information disclosure through the error response / stack trace (A05) (1 point).
+
+**38.** Through Windows UI Automation, by AutomationId (or accessible name), not positions (1 point). Ask for stable automation ids / accessible names on every control (1 point).
+
+**39.** A hook when it must always happen, enforced by the harness; `CLAUDE.md` is only advice (1 point). Example: run unit tests after every test edit; block edits to product code; block `git push` when tests are red (1 point).
+
+**40.** An eval: run the AI-written tests against known seeded bugs (the bug kit) and count how many are caught; they must also pass with no bugs (1 point). Rerun after each skill change and compare scores; also review assertions (1 point).

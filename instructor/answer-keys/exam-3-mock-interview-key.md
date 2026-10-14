@@ -9,7 +9,7 @@ Score each answer 1–4:
 | 3 | Right, with a concrete example (Dose lab counts) |
 | 4 | Right, example, plus trade-offs or numbers, and links to medical risk |
 
-Pass: average 3 or more, no 1 on questions 2, 3, 6, 7, 9, 10.
+Pass: average 3 or more, no 1 on questions 2, 3, 6, 7, 9, 10, 13, 16.
 
 Ask at least one follow-up per answer ("why?", "what would you do if…?"). Below: what a 4 includes.
 
@@ -60,6 +60,22 @@ Patient safety. IEC 62304 (safety classes A/B/C), ISO 14971 risk management, ISO
 ## 12. A bug that mattered (STAR)
 
 Clear situation, her own actions, a result with impact (ideally a number). Shows judgment: how she found it, how she reported it, how she made sure it did not come back (a test).
+
+## 13. Improving a slow, flaky, over-mocked harness
+
+Measure first (duration per project, flaky rate per test). Quarantine flaky tests, fix causes (shared data, order, time). Replace mocks of simple code with fakes or real objects; keep mocks at boundaries; verify calls only when the call is the rule. Builders for data; `FakeTimeProvider`; custom `WebApplicationFactory`; Testcontainers instead of a shared database; traits to split smoke / full / Docker suites. Check quality with mutation testing, not coverage. A 4 names numbers from her lab (Stryker score before and after; the flaky test she fixed and its cause).
+
+## 14. Penetration testing of an API
+
+Written scope and permission first. Recon (Swagger, proxy history), automated scan (ZAP API scan), manual tests with Burp Repeater from valid requests: access control without credentials, auth edge cases, injection in each field, error handling, input limits, headers, CORS, transport. Report with severity, evidence, impact, fix; retest; turn findings into regression tests. A 4 explains why the scanner missed what manual testing found (her lab: injection behind validation) and links to health data (GDPR).
+
+## 15. C++ desktop client UI automation
+
+Windows UI Automation; find by AutomationId; ask developers for ids early. Screen objects, no sleeps, fresh process per test, screenshots on failure, interactive session on CI agents, regional settings and display scaling. Ranorex: Spy, RanoreXPath, repository, recorder plus C# code modules, CLI for CI. FlaUI or Squish as alternatives. GoogleTest/Catch2 for unit level. A 4 mentions her FlaUI tests and the locale bug she found (L15-4).
+
+## 16. An AI workflow she built
+
+Shows real files: a skill (her `find-flaky-tests` or `write-playwright-test`), a hook (tests after edit, or the guard against product-code edits), the reviewer agent. Measures with an eval against the bug kit (catch rate, and green on correct code), reruns after changes. Human review, read-only tools in CI, synthetic data only. A 4 gives her eval numbers and one improvement she made to a skill because of them.
 
 ## Extra questions
 

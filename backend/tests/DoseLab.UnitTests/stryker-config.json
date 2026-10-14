@@ -1,0 +1,9 @@
+{
+  "stryker-config": {
+    "solution": "../../DoseLab.slnx",
+    "project": "DoseLab.Application.csproj",
+    "test-projects": ["DoseLab.UnitTests.csproj"],
+    "reporters": ["html", "progress", "cleartext"],
+    "thresholds": { "high": 90, "low": 75, "break": 0 }
+  }
+}

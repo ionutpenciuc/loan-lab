@@ -81,9 +81,12 @@ The job says "design and own end-to-end test strategies". A test strategy answer
 | --- | --- | --- |
 | Unit | `backend/tests/DoseLab.UnitTests/` | `dotnet test` in `backend` |
 | Integration (API) | `backend/tests/DoseLab.ApiTests/` | `dotnet test` in `backend` |
+| Integration (real database) | `backend/tests/DoseLab.IntegrationTests/` | `dotnet test` in `backend` (Docker running), lesson 12 |
 | UI / system | `frontend/e2e/` | `npm run test:e2e` in `frontend` |
-| Performance | `perf/` | `k6 run perf/smoke.js` |
-| Pipeline | `.github/workflows/ci.yml` | GitHub Actions, on every push |
+| Desktop UI | `desktop/tests/DoseLab.Desktop.UiTests/` | `dotnet test DoseLab.Desktop.slnx` in `desktop` (Windows), lesson 15 |
+| Performance | `perf/`, `backend/benchmarks/` | `k6 run perf/smoke.js`, lessons 05 and 13 |
+| Security | ZAP scan | `.github/workflows/nightly.yml`, lesson 14 |
+| Pipeline | `.github/workflows/ci.yml`, `nightly.yml` | GitHub Actions, on every push and every night |
 
 ## Do
 

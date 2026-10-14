@@ -69,6 +69,8 @@ Patient data is sensitive personal data (GDPR in the EU, HIPAA in the US). Acces
    ```
    Read 3 warnings. Which are real risks for this app?
 
+Hands-on penetration testing with ZAP and Burp, on this app, is [lesson 14](14-penetration-testing-lab.md).
+
 ## Check yourself
 
 1. Name five OWASP Top 10 risks.

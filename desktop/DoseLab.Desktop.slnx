@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DoseLab.Desktop/DoseLab.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DoseLab.Desktop.UiTests/DoseLab.Desktop.UiTests.csproj" />
+  </Folder>
+</Solution>

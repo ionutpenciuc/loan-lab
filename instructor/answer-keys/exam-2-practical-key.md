@@ -54,6 +54,12 @@ Use the bug table in `instructor/README.md` to know what is on. For each bug, sc
 - Full points also for a C# test that saves in parallel (`Parallel.For` / `Task.WhenAll`) through the API and checks uniqueness. That is a valid integration-level concurrency test.
 - Report: "Concurrent saves produce duplicate plan reference numbers". Severity high: two patients' plans can be confused.
 
+### 09 — SQL injection in the PostgreSQL repository (integration)
+
+Needs Docker. Only use it if she has Docker working (lesson 12).
+- Test: `PostgresTaperPlanRepositoryShould` (or an API test with `Lab:Storage=Postgres`) saving a name with an apostrophe, e.g. `O'Brien`, and reading it back unchanged. Reference: `PostgresSolutionShould.StoreAPatientNameExactlyAsWritten`.
+- Full points also need: OWASP A03, severity High, and a note that the 500 response leaks the SQL (A05).
+
 ## Last check
 
 Turn the bugs off (`instructor/bug.sh reset`), restart, and run all her tests. Each test that fails now loses its 1 point ("passes when the bug is off").

@@ -1,10 +1,11 @@
-# GitLab CI version of .github/workflows/ci.yml, for study.
-# GitHub does not run this file. To use it on GitLab, copy it to .gitlab-ci.yml at the repo root.
+# GitLab CI version of .github/workflows/ci.yml and nightly.yml, for study.
+# GitHub does not run this file. To run it on GitLab for real, see tools/gitlab-ci.md.
 
 stages:
   - test
   - e2e
   - performance
+  - nightly
 
 variables:
   DOTNET_CLI_TELEMETRY_OPTOUT: "1"
@@ -12,12 +13,26 @@ variables:
 backend-tests:
   stage: test
   image: mcr.microsoft.com/dotnet/sdk:10.0
+  # Testcontainers (lesson 12) needs Docker. In GitLab, the job gets it from a "Docker-in-Docker" service.
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    TESTCONTAINERS_HOST_OVERRIDE: docker
   script:
-    - dotnet test backend/DoseLab.slnx --logger trx --results-directory TestResults
+    - dotnet test backend/DoseLab.slnx --results-directory TestResults
+        --logger "junit;LogFileName={assembly}.junit.xml"
+        --collect "XPlat Code Coverage"
   artifacts:
     when: always
     paths:
       - TestResults/
+    reports:
+      junit: TestResults/*.junit.xml                # failed tests show in the merge request
+      coverage_report:
+        coverage_format: cobertura                  # covered lines show in the merge request diff
+        path: TestResults/**/coverage.cobertura.xml
     expire_in: 1 week
 
 e2e-tests:
@@ -39,6 +54,19 @@ e2e-tests:
       - frontend/test-results/
     expire_in: 1 week
 
+# Windows desktop UI tests (lesson 15). Needs a Windows runner: GitLab.com hosted Windows runners,
+# or your own runner on a Windows machine with an interactive desktop session.
+desktop-ui-tests:
+  stage: e2e
+  needs: []
+  tags: [saas-windows-medium-amd64]
+  script:
+    - dotnet test desktop/DoseLab.Desktop.slnx --results-directory TestResults --logger "junit;LogFileName={assembly}.junit.xml"
+  artifacts:
+    when: always
+    reports:
+      junit: TestResults/*.junit.xml
+
 .api-running: &api-running
   image: mcr.microsoft.com/dotnet/sdk:10.0
   before_script:
@@ -53,12 +81,62 @@ perf-smoke:
   script:
     - k6 run perf/smoke.js
 
-# Long tests run only on a schedule (CI/CD → Schedules in GitLab), never on every push.
-# perf/stress-create.js is the stress test you write in lesson 05.
-perf-stress-nightly:
-  <<: *api-running
-  stage: performance
+# Long tests run only on a schedule (Build → Pipeline schedules in GitLab), never on every push.
+.nightly: &nightly
+  stage: nightly
+  needs: []
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"          # "Run pipeline" button
+      when: manual
+      allow_failure: true
+
+# perf/stress-create.js is the stress test you write in lesson 05.
+perf-stress-nightly:
+  <<: [*api-running, *nightly]
   script:
     - k6 run perf/stress-create.js
+
+mutation-nightly:
+  <<: *nightly
+  image: mcr.microsoft.com/dotnet/sdk:10.0
+  script:
+    - cd backend/tests/DoseLab.UnitTests
+    - dotnet tool restore
+    - dotnet stryker
+  artifacts:
+    when: always
+    paths:
+      - backend/tests/DoseLab.UnitTests/StrykerOutput/
+
+# DAST scans a running app. Real pipelines scan the test environment that the deploy stage just updated.
+# Set TEST_ENV_URL in Settings → CI/CD → Variables, for example https://doselab-test.example.com
+zap-api-scan-nightly:
+  <<: *nightly
+  image: ghcr.io/zaproxy/zaproxy:stable
+  script:
+    - mkdir -p /zap/wrk
+    - zap-api-scan.py -t "$TEST_ENV_URL/swagger/v1/swagger.json" -f openapi -I -r zap-report.html
+    - cp /zap/wrk/zap-report.html .
+  artifacts:
+    when: always
+    paths:
+      - zap-report.html
+
+# Lesson 16: an AI agent triages failed tests. Runs only when an earlier job failed.
+# Needs a masked CI/CD variable ANTHROPIC_API_KEY. The agent only reads; a human decides.
+ai-triage:
+  stage: nightly
+  image: node:22
+  needs:
+    - job: backend-tests
+      artifacts: true
+  when: on_failure
+  allow_failure: true
+  script:
+    - npm install -g @anthropic-ai/claude-code
+    - claude -p "Use the triage-test-failure skill. Read the JUnit files in TestResults/. For each failed test, give the classification and a draft bug report. Do not change any files." --allowedTools "Read,Grep,Glob" > triage.md
+  artifacts:
+    when: always
+    paths:
+      - triage.md

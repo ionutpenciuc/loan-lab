@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Proves the bug kit still works after you change the app.
 # For every bug: the sample tests still pass, and the answer-key test for that layer fails.
-# Needs: .NET 10 SDK, Node.js, Playwright Chromium, k6. Takes about 5 minutes.
+# Needs: .NET 10 SDK, Node.js, Playwright Chromium, k6, and Docker running. Takes about 8 minutes.
 #
 #   instructor/verify.sh            check every bug
 #   instructor/verify.sh 03 07      check only bugs 03 and 07
@@ -17,6 +17,7 @@ api_url="http://localhost:$api_port"
 solutions="$root/instructor/solutions"
 unit_dir="$root/backend/tests/DoseLab.UnitTests"
 api_dir="$root/backend/tests/DoseLab.ApiTests"
+integration_dir="$root/backend/tests/DoseLab.IntegrationTests"
 e2e_dir="$root/frontend/e2e"
 log="$root/instructor/verify.log"
 failures=0
@@ -26,7 +27,7 @@ api_pid=""
 
 cleanup() {
   [ -n "$api_pid" ] && kill "$api_pid" 2>/dev/null
-  rm -f "$unit_dir"/*SolutionShould.cs "$api_dir"/*SolutionShould.cs "$e2e_dir"/*.solution.spec.ts
+  rm -f "$unit_dir"/*SolutionShould.cs "$api_dir"/*SolutionShould.cs "$integration_dir"/*SolutionShould.cs "$e2e_dir"/*.solution.spec.ts
   instructor/bug.sh reset >/dev/null
 }
 trap cleanup EXIT
@@ -64,7 +65,7 @@ check_bug() {
   echo "bug $id"
   instructor/bug.sh on "$id" >/dev/null
   case "$id" in
-    01|02|03|04)
+    01|02|03|04|09)
       expect "sample tests" pass backend_samples
       expect "answer key" fail backend_solutions
       ;;
@@ -73,6 +74,7 @@ check_bug() {
       expect "answer key" fail e2e taper-plans.solution.spec.ts
       ;;
     07)
+      expect "unit answer key (mock call count)" fail backend_solutions
       expect "smoke test" pass k6_run perf/smoke.js
       expect "answer key" fail k6_run instructor/solutions/perf/list-latency.js
       ;;
@@ -85,8 +87,10 @@ check_bug() {
 }
 
 instructor/bug.sh reset >/dev/null
-cp "$solutions"/backend/TaperScheduleCalculatorSolutionShould.cs "$solutions"/backend/TaperPlanServiceSolutionShould.cs "$unit_dir"/
-cp "$solutions"/backend/TaperPlansApiSolutionShould.cs "$api_dir"/
+cp "$solutions"/backend/TaperScheduleCalculatorSolutionShould.cs "$solutions"/backend/TaperPlanServiceSolutionShould.cs \
+   "$solutions"/backend/CSharpBasicsSolutionShould.cs "$solutions"/backend/TaperPlanServiceWithMocksSolutionShould.cs "$unit_dir"/
+cp "$solutions"/backend/TaperPlansApiSolutionShould.cs "$solutions"/backend/TaperPlansApiHarnessSolutionShould.cs "$api_dir"/
+cp "$solutions"/backend/PostgresSolutionShould.cs "$integration_dir"/
 cp "$solutions"/e2e/*.solution.spec.ts "$e2e_dir"/
 
 echo "no bugs"
@@ -95,7 +99,7 @@ expect "Playwright samples and answer keys" pass e2e ""
 expect "k6 list latency" pass k6_run instructor/solutions/perf/list-latency.js
 expect "k6 stress create" pass k6_run instructor/solutions/perf/stress-create.js
 
-if [ $# -gt 0 ]; then ids=("$@"); else ids=(01 02 03 04 05 06 07 08); fi
+if [ $# -gt 0 ]; then ids=("$@"); else ids=(01 02 03 04 05 06 07 08 09); fi
 for id in "${ids[@]}"; do check_bug "$id"; done
 
 echo
