@@ -1,19 +1,19 @@
 # Exams
 
-Three exams check that you are ready. Take them at the end of day 3, after all lessons.
+Three exams check that you are ready. Take them on day 7, after all lessons.
 
 | Exam | Format | Time | Pass mark |
 | --- | --- | --- | --- |
-| [1 — Theory](exam-1-theory.md) | 20 multiple choice + 10 short answers, no notes | 45 min | 32 of 40 (80%) |
+| [1 — Theory](exam-1-theory.md) | 20 multiple choice + 10 short answers + 10 advanced short answers, no notes | 60 min | 32 of 40 and 14 of 20 |
 | [2 — Practical bug hunt](exam-2-practical.md) | Your mentor turns on 4 hidden bugs. Find them with tests. | 90 min | 30 of 40 |
-| [3 — Mock interview](exam-3-mock-interview.md) | Your mentor asks 12 questions out loud | 45 min | average 3 of 4, no score of 1 on core questions |
+| [3 — Mock interview](exam-3-mock-interview.md) | Your mentor asks 16 questions out loud | 50 min | average 3 of 4, no score of 1 on core questions |
 
 ## Ready for the interview
 
 You are ready when:
 
 - You pass all three exams.
-- Your fork on GitHub has your tests at every level (unit, API, Playwright, k6), your notes, and a green pipeline.
+- Your fork on GitHub has your tests at every level (unit, API, integration, Playwright, desktop, k6), your notes, your pen-test report, your AI skill and hook, and a green pipeline.
 - You can give your 60-second story and 5 STAR stories without notes.
 
 If you fail an exam: read the mentor's notes, redo the lesson for each weak area, and take that exam again the next day. For Exam 2, your mentor picks a different set of bugs.

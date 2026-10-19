@@ -4,6 +4,8 @@ Time: 90 minutes.
 
 Goal: read the C# in this repo, and write good xUnit tests with test-design techniques.
 
+New to C# or .NET? Do [lesson 00](00-dotnet-fundamentals.md) first.
+
 ## Learn: just enough C#
 
 ```csharp
@@ -87,8 +89,8 @@ A good unit test is **FIRST**: Fast, Isolated (no shared state), Repeatable (sam
 | --- | --- | --- |
 | Fake | A simple working version | `InMemoryTaperPlanRepository` (a list instead of a database) |
 | Stub | Returns fixed answers | A fixed clock: `FixedClock : TimeProvider` |
-| Mock | Checks that a call happened | Not used here. Libraries: Moq, NSubstitute |
-| Spy | Records calls for later checks | Not used here |
+| Mock | Checks that a call happened | NSubstitute, in lesson 11 (`TaperPlanServiceWithMocksShould.cs`). Also common: Moq |
+| Spy | Records calls for later checks | NSubstitute `ReceivedCalls()`, lesson 11 |
 
 `SimulatedLatency.None` turns off the fake database delay in unit tests.
 
@@ -101,6 +103,8 @@ A green test proves nothing until you have seen it fail for the right reason.
 - **Red/green check.** Break the expected value. The test must fail. Put it back.
 - **Mutation testing.** A tool (Stryker.NET) makes small changes to the code ("mutants"). Good tests fail ("kill the mutant"). The hidden bugs in this lab are hand-made mutants.
 - **Coverage** shows which lines ran. It does not show that you checked the result. Use it to find untested code, not as a target.
+
+You run both tools for real in [lesson 11](11-test-harness-engineering.md).
 
 ## Do
 

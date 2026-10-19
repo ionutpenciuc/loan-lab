@@ -1,5 +1,7 @@
 using DoseLab.Api;
 using DoseLab.Application;
+using DoseLab.Postgres;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,13 +21,30 @@ builder.Services.AddCors(options =>
 var latencyMs = builder.Configuration.GetValue("Lab:SimulatedLatencyMs", 3);
 builder.Services.AddSingleton(new SimulatedLatency(TimeSpan.FromMilliseconds(latencyMs)));
 builder.Services.AddSingleton(TimeProvider.System);
-builder.Services.AddSingleton<ITaperPlanRepository, InMemoryTaperPlanRepository>();
+
+// "InMemory" (default) or "Postgres". Postgres needs a database: see tools/docker-and-postgres.md.
+if (builder.Configuration.GetValue("Lab:Storage", "InMemory") == "Postgres")
+{
+    var connectionString = builder.Configuration.GetConnectionString("DoseLab")
+        ?? throw new InvalidOperationException("ConnectionStrings:DoseLab is required when Lab:Storage is Postgres.");
+    builder.Services.AddSingleton(NpgsqlDataSource.Create(connectionString));
+    builder.Services.AddSingleton<ITaperPlanRepository, PostgresTaperPlanRepository>();
+}
+else
+{
+    builder.Services.AddSingleton<ITaperPlanRepository, InMemoryTaperPlanRepository>();
+}
+
 builder.Services.AddSingleton<IMedicationCatalog, InMemoryMedicationCatalog>();
 builder.Services.AddSingleton<TaperPlanService>();
 
 var app = builder.Build();
 
-DoseLabSeed.Apply(app.Services.GetRequiredService<ITaperPlanRepository>());
+var repository = app.Services.GetRequiredService<ITaperPlanRepository>();
+if (repository is PostgresTaperPlanRepository postgres)
+    postgres.EnsureSchema();
+if (repository.List().Count == 0)
+    DoseLabSeed.Apply(repository);
 
 if (app.Environment.IsDevelopment())
 {

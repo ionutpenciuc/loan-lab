@@ -1,10 +1,10 @@
 # Exam 1 — Theory
 
-Time: 45 minutes. No notes, no internet, no AI.
+Time: 60 minutes (parts A and B: 45, part C: 15). No notes, no internet, no AI.
 
 Write your answers in `notes/exam-1-answers.md`. For part A, write the number and the letter (for example `1 b`).
 
-Total: 40 points. Pass: 32.
+Parts A and B: 40 points, pass 32. Part C (advanced track): 20 points, pass 14. You must pass both.
 
 ## Part A — Multiple choice (1 point each)
 
@@ -153,3 +153,27 @@ Two or three sentences each.
 **29.** What is traceability in medical software testing, and why does an auditor care?
 
 **30.** Name two risks of AI-generated tests, and how you control each one.
+
+## Part C — Advanced track (2 points each)
+
+One or two sentences each.
+
+**31.** In a .NET API, `Lab:ApiKey` is set in `appsettings.json`. How do you change it for one test, without editing the file? Name the class you use.
+
+**32.** Stub vs mock: what is the difference? When is checking a call with a mock a bad idea?
+
+**33.** Line coverage is 90%, mutation score is 40%. What does this tell you, and what do you do next?
+
+**34.** A test passes alone and fails when run with the rest of its class. Give the most likely cause and the first two things you do.
+
+**35.** Why use Testcontainers instead of a shared test database? Name one cost.
+
+**36.** Under load, `dotnet-counters` shows the thread pool queue length growing, while CPU stays low. What is the likely cause?
+
+**37.** A ZAP API scan of an endpoint reports no injection, but a manual request with `O'Brien` in a name returns 500. Why did the scanner miss it? Which two findings do you report?
+
+**38.** How do UI tests find elements in a Windows desktop app, and what do you ask C++ developers for to make their app testable?
+
+**39.** Claude Code: when do you use a hook instead of a line in `CLAUDE.md`? Give one QA example.
+
+**40.** How would you measure whether an AI skill that writes tests is any good?

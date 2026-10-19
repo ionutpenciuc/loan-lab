@@ -1,15 +1,16 @@
 # Dose lab
 
-A small medical-style app for learning test automation: unit, API, UI (Playwright), performance and stress (k6), CI, security, and AI-assisted testing.
+A small medical-style app for learning test automation: unit, API, integration with a real database, web UI (Playwright), desktop UI (FlaUI), performance and stress (k6, BenchmarkDotNet), CI, penetration testing, and AI-assisted testing.
 
 Nurses create **taper plans**: a patient's daily dose of a medication goes down by the same step every week. The app shows the plans, previews the week-by-week schedule, and saves new plans.
 
 The medications and their limits are **fictional**. This is not medical guidance.
 
-- Backend: .NET 10 Web API, in `backend/`. Data is kept in memory. Restart the API and saved plans are gone. Two sample plans come back.
+- Backend: .NET 10 Web API, in `backend/`. By default data is kept in memory: restart the API and saved plans are gone, and two sample plans come back. It can also use PostgreSQL (lesson 12).
 - Frontend: React + TypeScript (Vite), in `frontend/`.
+- Desktop: a small Windows Forms app, in `desktop/` (Windows only, lesson 15).
 
-**Start here after setup: [lessons/README.md](lessons/README.md)**, the 3-day study plan.
+**Start here after setup: [lessons/README.md](lessons/README.md)**, the 7-day study plan.
 
 ## Install the tools
 
@@ -19,6 +20,9 @@ The medications and their limits are **fictional**. This is not medical guidance
 | .NET 10 SDK | `dotnet --version` (must start with `10.`) | https://dotnet.microsoft.com/download/dotnet/10.0 |
 | Node.js 20 or newer | `node --version` | https://nodejs.org |
 | k6 (for lesson 05) | `k6 version` | https://grafana.com/docs/k6/latest/set-up/install-k6/ |
+| Docker Desktop (from lesson 12) | `docker run --rm hello-world` | [tools/docker-and-postgres.md](tools/docker-and-postgres.md) |
+
+Step-by-step for Windows, and guides for every other tool (ZAP, Burp, Stryker, FlaUI, Ranorex, Cypress, Claude Code): [tools/README.md](tools/README.md).
 
 On Windows, use Git Bash for the `instructor/bug.sh` script. All other commands work in PowerShell too.
 
@@ -45,7 +49,9 @@ Wait for `Now listening on: http://localhost:5080`. The first run downloads pack
 - API docs: http://localhost:5080/swagger
 - Ready-made requests for Rider or VS Code: `backend/DoseLab.http`
 
-In Rider: open `backend/DoseLab.slnx`, choose the `DoseLab.Api: http` run configuration, and press Run.
+In Rider or Visual Studio: open `backend/DoseLab.slnx`, choose the `http` launch profile, and press Run.
+
+To keep data in PostgreSQL instead: `docker compose up -d` in the repo folder, then use the `http-postgres` launch profile (`dotnet run --project src/DoseLab.Api --launch-profile http-postgres`).
 
 ### 3. Start the UI (terminal 2)
 
@@ -68,31 +74,42 @@ Open http://localhost:5173. You should see two plans: Maria Ionescu and Andrei S
 
 ## Run the tests
 
-| Level | Command | Folder | Sample tests |
-| --- | --- | --- | --- |
-| Unit + API | `dotnet test` | `backend` | 3 taper samples, plus the algorithm tests |
-| UI (Playwright) | `npx playwright install chromium` (once), then `npm run test:e2e` | `frontend` | 1 |
-| Performance smoke | `k6 run perf/smoke.js` (API must be running) | repo root | 1 |
+| Level | Command | Folder |
+| --- | --- | --- |
+| Unit + API + integration | `dotnet test` (needs Docker running) | `backend` |
+| The same, without Docker | `dotnet test --filter "Category!=Docker"` | `backend` |
+| UI (Playwright) | `npx playwright install chromium` (once), then `npm run test:e2e` | `frontend` |
+| Desktop UI (FlaUI, Windows only) | `dotnet test DoseLab.Desktop.slnx` | `desktop` |
+| Performance smoke | `k6 run perf/smoke.js` (API must be running) | repo root |
+| Micro-benchmarks | `dotnet run -c Release --project benchmarks/DoseLab.Benchmarks -- --filter "*"` | `backend` |
+| Mutation testing | `dotnet tool restore`, then `dotnet stryker` | `backend/tests/DoseLab.UnitTests` |
+
+Skipped tests are exercises: see "Exercises in the code" in [lessons/README.md](lessons/README.md).
 
 Playwright starts the API and the UI itself or reuses them if they already run. To use other ports: `LAB_API_PORT=5181 LAB_UI_PORT=5182 npm run test:e2e`.
 
-GitHub Actions runs all three levels on every push: `.github/workflows/ci.yml`.
+GitHub Actions runs unit, API, integration (with coverage), Playwright, desktop UI and a k6 smoke on every push (`.github/workflows/ci.yml`), and mutation testing plus a ZAP security scan every night (`.github/workflows/nightly.yml`).
 
 ## Repo map
 
 | Path | What |
 | --- | --- |
 | `backend/src/DoseLab.Application/` | Rules: taper calculator, service, in-memory repository, medication catalog |
+| `backend/src/DoseLab.Postgres/` | The PostgreSQL repository |
 | `backend/src/DoseLab.Algorithms/` | Interview algorithms: search, sort, hash map, stack, graph, dynamic programming |
 | `backend/src/DoseLab.Api/` | Controllers, API key filter, contracts |
-| `backend/tests/` | Sample unit and API tests. Add yours here. |
+| `backend/tests/` | Unit, API, integration (Testcontainers) and algorithm tests, with exercises. Add yours here. |
+| `backend/benchmarks/` | BenchmarkDotNet |
+| `desktop/` | Windows Forms app and FlaUI UI tests |
 | `frontend/src/` | The React screen |
 | `frontend/e2e/` | Playwright tests. Add yours here. |
 | `perf/` | k6 scripts |
-| `lessons/` | 10 lessons and the study plan |
+| `docker-compose.yml` | PostgreSQL for the app |
+| `lessons/` | 17 lessons and the 7-day study plan |
 | `exams/` | 3 exams |
-| `CLAUDE.md`, `.claude/` | Context, skills, and a reviewer agent for AI coding agents |
-| `ci/` | GitLab CI version of the pipeline, for study |
+| `tools/` | Install and first-use guides for every external tool |
+| `CLAUDE.md`, `.claude/` | Context, skills, hooks, and a reviewer agent for AI coding agents |
+| `ci/` | GitLab CI version of the pipelines, for study |
 | `instructor/` | For the mentor only: hidden bugs and answer keys. Do not open. |
 
 ## If something fails
@@ -106,3 +123,4 @@ GitHub Actions runs all three levels on every push: `.github/workflows/ci.yml`.
 | `npm` is not found | Install Node.js. Open a new terminal. |
 | Playwright cannot find the browser | Run `npx playwright install chromium` in `frontend`. |
 | k6 thresholds fail on a second run | Restart the API. Data from the last run is still in memory. |
+| `dotnet test` fails with a Docker error | Start Docker Desktop, or run `dotnet test --filter "Category!=Docker"` |

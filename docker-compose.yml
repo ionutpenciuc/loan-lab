@@ -1,0 +1,22 @@
+# A PostgreSQL database for the API (lesson 12) and a target for security scans (lesson 14).
+#   docker compose up -d      start
+#   docker compose down       stop (data is kept)
+#   docker compose down -v    stop and delete the data
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: doselab
+      POSTGRES_USER: doselab
+      POSTGRES_PASSWORD: doselab   # lab only; never commit real passwords
+    ports:
+      - "5433:5432"
+    volumes:
+      - doselab-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U doselab"]
+      interval: 2s
+      retries: 15
+
+volumes:
+  doselab-data:

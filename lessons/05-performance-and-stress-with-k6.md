@@ -51,7 +51,7 @@ A **threshold** (or SLO, service-level objective) turns a measurement into pass/
 
 Some bugs only appear when requests run **at the same time**: race conditions, deadlocks, duplicate ids, lost updates. One user never triggers them. A stress test with many users does. In medical software, a duplicate prescription reference is a patient safety risk.
 
-To find the cause: a profiler (dotTrace in Rider, Visual Studio Profiler), `dotnet-counters` (live CPU, GC, thread pool), `dotnet-trace`, logs, and APM tools (Application Performance Monitoring: Application Insights, Datadog, New Relic).
+To find the cause: a profiler (dotTrace in Rider, Visual Studio Profiler), `dotnet-counters` (live CPU, GC, thread pool), `dotnet-trace`, logs, and APM tools (Application Performance Monitoring: Application Insights, Datadog, New Relic). You use them hands-on in [lesson 13](13-dotnet-performance-profiling.md).
 
 ### The fake database
 

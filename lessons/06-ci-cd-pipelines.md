@@ -49,16 +49,18 @@ The job ad names GitLab CI. Know both.
 
 ## In this repo
 
-- `.github/workflows/ci.yml`. Runs on every push and pull request: backend tests, then Playwright and a k6 smoke in parallel. Keeps reports as artifacts.
-- `ci/gitlab-ci.example.yml`. The same pipeline for GitLab, for reading. GitHub does not run it.
+- `.github/workflows/ci.yml`. Runs on every push and pull request: backend tests (unit, API, Testcontainers) with a coverage report, then Playwright and a k6 smoke in parallel, and the desktop UI tests on a Windows runner. Keeps reports as artifacts.
+- `.github/workflows/nightly.yml`. Every night: mutation testing (Stryker.NET), dependency scans, and a ZAP API scan. Slow checks that should not block a pull request.
+- `ci/gitlab-ci.example.yml`. The same pipelines for GitLab, for reading: stages, `services` (Docker-in-Docker for Testcontainers), `reports: junit` and `coverage_report`, a Windows runner, scheduled jobs, and an AI triage job. GitHub does not run it. To try it on GitLab: [tools/gitlab-ci.md](../tools/gitlab-ci.md).
 
 ## Do
 
 1. Open `.github/workflows/ci.yml`. For each job, say what it does and why it is in that order.
 2. On GitHub, open your fork → **Actions**. Enable workflows if asked. Push a commit. Watch the run. Open a log. Download the Playwright report artifact.
 3. Make it fail on purpose: on a new branch, break one expected value in a test, push, open a pull request. See the red check. Fix it. See it go green.
-4. Add a **nightly** job to `ci.yml` that runs your k6 stress test (`on: schedule`). Use the existing `perf-smoke` job as a model.
-5. Read `ci/gitlab-ci.example.yml`. Find the stage, the artifacts, and the scheduled job. Compare with the GitHub file.
+4. **TODO(L06-4).** Add a job to `.github/workflows/nightly.yml` that runs your k6 stress test. Use the `perf-smoke` job in `ci.yml` as a model. Start it by hand: Actions → nightly → Run workflow.
+5. Read `ci/gitlab-ci.example.yml`. Find the stages, the artifacts, the JUnit report, the Docker-in-Docker service, and the scheduled jobs. Compare with the GitHub files.
+6. **Quality gates.** Open a finished run of `ci.yml` and read the coverage summary. Which of these would you make a blocking gate, and which only a report: coverage, mutation score, ZAP warnings, k6 thresholds? Write your answer with reasons in `notes/pipeline.md`.
 
 ## Practice bug hunt 2
 

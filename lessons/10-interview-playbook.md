@@ -55,16 +55,22 @@ Notes:     A wrong key is still rejected. Only a missing header gets through.
 | How do you use AI agents in QA? How do you trust the output? | 08 |
 | What is different about medical software? | 09 |
 | TDD and shift-left: how do you work with developers? | 09 |
+| Walk me through this C# code / this .NET solution. | 00 |
+| How do you build a test harness? Mocks, fixtures, test data? | 11 |
+| How do you deal with flaky tests? | 11, 04 |
+| How do you know your tests are good? (coverage, mutation testing) | 11 |
+| How do you test against a real database in CI? | 12 |
+| k6 shows p95 is too high. What do you do next, in .NET? | 13 |
+| Have you done penetration testing? Walk me through it. | 14 |
+| How would you automate our C++ / .NET desktop app? Ranorex? | 15 |
+| Playwright or Cypress? | 15 |
+| What AI workflows have you built? How do you measure them? | 16 |
 
 ### Topics outside this lab
 
-**C++ desktop apps.** The pyramid is the same.
+**C++ code itself.** Unit tests in C++ use GoogleTest or Catch2, run by CTest. You will not write them on day one, but know the names, and that the pyramid is the same. The desktop UI side is in lesson 15.
 
-- Unit tests: GoogleTest or Catch2.
-- UI automation for Windows desktop: Ranorex (named in the ad), FlaUI (C#, Windows UI Automation), WinAppDriver / Appium.
-- Same rules as web: stable element ids (automation ids), no fixed waits, page objects ("screen objects").
-
-**Ranorex** is a commercial tool for desktop, web, and mobile UI tests, with a recorder and C# code. **Cypress** is a JavaScript web test tool, similar to Playwright. It runs inside the browser, while Playwright drives the browser from outside.
+**Mobile.** Appium, or the platform tools (Espresso for Android, XCUITest for iOS). Ranorex also does mobile.
 
 If you do not know something: say so, then say how you would find out. "I have not used Ranorex yet. I'd start with its C# API, because I write my tests in C# already."
 
@@ -82,4 +88,4 @@ If you do not know something: say so, then say how you would find out. "I have n
 - Pass all three exams (see `exams/`).
 - Push your fork. Clean up `notes/`. Make the README of your fork say what you added.
 - Practice your story and 5 STAR stories out loud.
-- Prepare a 3-minute demo: run `dotnet test`, run one Playwright test in UI mode, show a k6 summary, show a skill file.
+- Prepare a 5-minute demo from your fork: run `dotnet test` (with the Testcontainers tests), one Playwright test in UI mode, the FlaUI desktop test, a k6 summary, your Stryker report before and after, your pen-test report, and your hook and skill with the eval score from lesson 16.

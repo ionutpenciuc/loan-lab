@@ -1,6 +1,6 @@
 # Exam 3 — Mock interview
 
-Time: 45 minutes. Your mentor plays the interviewer.
+Time: 50 minutes. Your mentor plays the interviewer.
 
 You may read these questions before. Practice the answers out loud. In the exam, you have no notes. The mentor may ask follow-up questions.
 
@@ -18,6 +18,10 @@ You may read these questions before. Practice the answers out loud. In the exam,
 10. How do you use AI agents like Claude Code in QA work? How do you make sure the output is trustworthy? What would you build for our QA community?
 11. What is different about testing medical device software?
 12. Tell me about a bug you found that mattered. (STAR)
+13. You inherit a .NET test suite that is slow and flaky, with mocks everywhere. How do you improve the harness?
+14. Have you done penetration testing? Walk me through how you would test our API.
+15. Our product has a C++ desktop client. How would you automate its UI, and where does Ranorex fit?
+16. Show me an AI workflow you built for testing. How do you know it works?
 
 Possible extra questions:
 
@@ -32,4 +36,4 @@ Possible extra questions:
 
 The mentor scores each answer from 1 to 4. See `instructor/answer-keys/exam-3-mock-interview-key.md`.
 
-Pass: average 3 or more, and no score of 1 on questions 2, 3, 6, 7, 9, or 10.
+Pass: average 3 or more, and no score of 1 on questions 2, 3, 6, 7, 9, 10, 13, or 16.

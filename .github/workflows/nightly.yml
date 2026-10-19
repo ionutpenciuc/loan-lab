@@ -1,0 +1,69 @@
+name: nightly
+
+# Slow checks that do not block a pull request: mutation testing and a security scan.
+# Runs every night, or by hand: Actions → nightly → Run workflow.
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  mutation:
+    name: Mutation testing (Stryker.NET)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Run Stryker on the application rules
+        working-directory: backend/tests/DoseLab.UnitTests
+        run: |
+          dotnet tool restore
+          dotnet stryker
+      - name: Keep the mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report
+          path: backend/tests/DoseLab.UnitTests/StrykerOutput/**/reports/
+
+  security:
+    name: Dependency scan and ZAP API scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Vulnerable NuGet packages
+        run: dotnet list backend/DoseLab.slnx package --vulnerable --include-transitive
+      - name: Vulnerable npm packages
+        working-directory: frontend
+        run: npm audit --audit-level=high
+      - name: Start the API
+        run: |
+          dotnet run --project backend/src/DoseLab.Api --urls http://localhost:5080 > api.log 2>&1 &
+          for i in $(seq 1 90); do
+            curl -fs http://localhost:5080/api/medications > /dev/null && exit 0
+            sleep 1
+          done
+          cat api.log
+          exit 1
+      # -I: report warnings, do not fail the job. Remove it to make ZAP a quality gate.
+      - name: ZAP API scan
+        run: |
+          mkdir -p zap && chmod 777 zap
+          docker run --rm --network host -v "$PWD/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:stable \
+            zap-api-scan.py -t http://localhost:5080/swagger/v1/swagger.json -f openapi -I -r zap-report.html
+      - name: Keep the ZAP report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: zap/zap-report.html
+
+  # TODO(L06-4): add your k6 stress test here as a third job. Use perf-smoke in ci.yml as a model.

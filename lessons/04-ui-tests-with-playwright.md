@@ -99,6 +99,8 @@ await page.goto('/')
 await expect(page.getByRole('alert')).toContainText('Could not load taper plans')
 ```
 
+Desktop apps follow the same rules with other tools: see [lesson 15](15-desktop-ui-automation.md), which also compares Playwright with Cypress.
+
 ## In this repo
 
 - Sample: `frontend/e2e/taper-plans.spec.ts`.

@@ -74,6 +74,8 @@ If you have Claude Code (or Cursor), use it. If not, do steps 1, 4, and 5 by han
 4. **Triage.** Take a failing test output (break a test on purpose). Ask the agent to use the triage skill. Is the classification right?
 5. **Build a skill.** Write `.claude/skills/write-playwright-test/SKILL.md` for this repo. Include: where tests go, the page object, locator rules, unique data, no sleeps, how to run, a done check. This shows "building automation skills the QA community can reuse".
 
+Next: build your own hooks, skills, MCP setup and an eval for AI-written tests in [lesson 16](16-building-ai-qa-workflows.md).
+
 ## Check yourself
 
 1. What is the difference between `CLAUDE.md`, a skill, and a subagent?

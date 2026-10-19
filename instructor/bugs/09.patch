@@ -1,0 +1,20 @@
+diff --git a/backend/src/DoseLab.Postgres/PostgresTaperPlanRepository.cs b/backend/src/DoseLab.Postgres/PostgresTaperPlanRepository.cs
+index 114351a..03f9234 100644
+--- a/backend/src/DoseLab.Postgres/PostgresTaperPlanRepository.cs
++++ b/backend/src/DoseLab.Postgres/PostgresTaperPlanRepository.cs
+@@ -54,13 +54,12 @@ public sealed class PostgresTaperPlanRepository(NpgsqlDataSource dataSource) : I
+     {
+         var id = Guid.NewGuid();
+ 
+-        using var command = dataSource.CreateCommand("""
++        using var command = dataSource.CreateCommand($"""
+             INSERT INTO taper_plans (id, patient_name, medication_code, starting_daily_dose_mg, week_count, created_on)
+-            VALUES (@id, @patient_name, @medication_code, @starting_daily_dose_mg, @week_count, @created_on)
++            VALUES (@id, '{draft.PatientName}', @medication_code, @starting_daily_dose_mg, @week_count, @created_on)
+             RETURNING sequence_number
+             """);
+         command.Parameters.AddWithValue("id", id);
+-        command.Parameters.AddWithValue("patient_name", draft.PatientName);
+         command.Parameters.AddWithValue("medication_code", draft.MedicationCode);
+         command.Parameters.AddWithValue("starting_daily_dose_mg", draft.StartingDailyDoseMg);
+         command.Parameters.AddWithValue("week_count", draft.WeekCount);
